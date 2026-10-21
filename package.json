@@ -1,0 +1,36 @@
+{
+  "name": "prumo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "vercel-build": "if [ \"$VERCEL_ENV\" = production ]; then node scripts/migrate.ts; fi && next build",
+    "start": "node .next/standalone/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:db": "bash db/test/run.sh",
+    "db:migrate": "node scripts/migrate.ts",
+    "user:create": "node scripts/create-user.ts",
+    "webhook:register": "node scripts/register-webhook.ts",
+    "icons": "bash scripts/make-icons.sh"
+  },
+  "dependencies": {
+    "next": "^16.0.0",
+    "postgres": "^3.4.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-pluggy-connect": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "typescript": "^5.9.0"
+  }
+}
