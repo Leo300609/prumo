@@ -32,5 +32,6 @@ export async function q<T = Record<string, unknown>>(name: string, params: unkno
   return rows as unknown as T[];
 }
 
-/** Atalho para passar arrays/objetos para parâmetros ::jsonb. */
-export const json = (value: unknown) => JSON.stringify(value);
+/** Atalho para passar arrays/objetos para parâmetros ::jsonb. Uma string já serializada seria
+ *  codificada de novo pelo driver e chegaria ao Postgres como string JSON, não como array. */
+export const json = (value: unknown) => db().json(value as never);
