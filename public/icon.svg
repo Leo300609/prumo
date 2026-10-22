@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Prumo">
   <!-- Fundo sangrado (sem cantos): iOS e Android aplicam a própria máscara. -->
-  <rect width="1024" height="1024" fill="#14213D"/>
+  <rect width="1024" height="1024" fill="#0C3338"/>
   <!-- Fio de prumo -->
-  <line x1="512" y1="150" x2="512" y2="410" stroke="#E9D9B4" stroke-width="30" stroke-linecap="round"/>
-  <!-- Prumo (o peso de latão), com uma faixa de luz à esquerda -->
-  <rect x="460" y="396" width="104" height="48" rx="16" fill="#9A6E24"/>
+  <line x1="512" y1="150" x2="512" y2="410" stroke="#FBD1DB" stroke-width="30" stroke-linecap="round"/>
+  <!-- Prumo (o peso), com uma faixa de luz à esquerda -->
+  <rect x="460" y="396" width="104" height="48" rx="16" fill="#C8506B"/>
   <path d="M352 494 C352 462 376 440 408 440 L616 440 C648 440 672 462 672 494
-           C672 590 586 734 512 872 C438 734 352 590 352 494 Z" fill="#C99A3B"/>
+           C672 590 586 734 512 872 C438 734 352 590 352 494 Z" fill="#F2A0B5"/>
   <path d="M392 482 C392 472 402 464 416 464 L448 464 C428 566 466 704 506 828
-           C452 712 392 580 392 482 Z" fill="#E2BE6E" fill-opacity="0.75"/>
+           C452 712 392 580 392 482 Z" fill="#FFE3EA" fill-opacity="0.7"/>
   <!-- Linha de referência: o "ponto certo" que o prumo marca -->
-  <line x1="436" y1="918" x2="588" y2="918" stroke="#E9D9B4" stroke-width="22" stroke-linecap="round" stroke-opacity="0.7"/>
+  <line x1="436" y1="918" x2="588" y2="918" stroke="#FBD1DB" stroke-width="22" stroke-linecap="round" stroke-opacity="0.7"/>
 </svg>

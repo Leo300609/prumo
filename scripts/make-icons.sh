@@ -15,11 +15,11 @@ render 180 public/icons/apple-touch-icon.png
 render 32  public/icons/favicon-32.png
 
 # maskable: o desenho cabe no círculo central de 80%; encolhemos para 82% sobre o fundo inteiro
-convert -size 512x512 xc:'#14213D' \
+convert -size 512x512 xc:'#0C3338' \
   \( -background none -density 384 "$SRC" -resize 420x420 \) -gravity center -composite \
   public/icons/maskable-512.png
 
 # 1024 sem transparência, para quem quiser publicar numa loja ou usar como "App Store icon"
-convert -background '#14213D' -density 384 "$SRC" -resize 1024x1024 -alpha remove -alpha off public/icons/icon-1024.png
+convert -background '#0C3338' -density 384 "$SRC" -resize 1024x1024 -alpha remove -alpha off public/icons/icon-1024.png
 
 echo "✔ ícones em public/icons"

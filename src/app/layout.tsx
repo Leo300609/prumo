@@ -29,8 +29,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover', // conteúdo vai até as bordas; as margens seguras vêm do CSS (env(safe-area-inset-*))
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ECEFF3' },
-    { media: '(prefers-color-scheme: dark)', color: '#090F1C' },
+    { media: '(prefers-color-scheme: light)', color: '#EEF2F1' },
+    { media: '(prefers-color-scheme: dark)', color: '#071416' },
   ],
 };
 
