@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-/** Importa OFX ou CSV para uma conta (bancos fora do Open Finance, histórico antigo). */
+/** Importa OFX, CSV ou Excel (.xlsx) para uma conta (bancos fora do Open Finance, histórico antigo, planilhas). */
 export function ImportStatement({ accounts }: { accounts: { id: string; name: string }[] }) {
   const router = useRouter();
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -29,11 +29,11 @@ export function ImportStatement({ accounts }: { accounts: { id: string; name: st
         </select>
       </div>
       <div className="field">
-        <label htmlFor="imp-file">Arquivo OFX ou CSV</label>
-        <input id="imp-file" name="file" type="file" accept=".ofx,.csv,text/csv,application/x-ofx" required />
+        <label htmlFor="imp-file">Arquivo OFX, CSV ou Excel (.xlsx)</label>
+        <input id="imp-file" name="file" type="file" accept=".ofx,.csv,.xlsx,text/csv,application/x-ofx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required />
       </div>
       <label className="chip" style={{ marginBottom: 12 }}>
-        <input type="checkbox" name="invertSign" /> CSV de cartão com compras positivas
+        <input type="checkbox" name="invertSign" /> CSV ou Excel de cartão com compras positivas
       </label>
       {msg && <p className={`banner${msg.ok ? '' : ' error'}`} role="status">{msg.text}</p>}
       <button className="btn block" disabled={busy}>{busy ? 'Importando…' : 'Importar'}</button>

@@ -1,9 +1,10 @@
-// POST /api/import — importa extrato OFX ou CSV (multipart: file, accountId, invertSign).
+// POST /api/import — importa extrato OFX, CSV ou Excel .xlsx (multipart: file, accountId, invertSign).
 // Para bancos fora do Open Finance (ex.: Revolut) ou para trazer histórico antigo.
 import { createHash } from 'node:crypto';
 import { db, json, q } from '../../../db/index.ts';
-import { parseStatementCsv } from '../../../domain/csv.ts';
+import { parseStatementCsv, parseStatementSheets } from '../../../domain/csv.ts';
 import { decodeOfx, parseOfx } from '../../../domain/ofx.ts';
+import { readXlsx } from '../../../domain/xlsx.ts';
 import { sessionOr401 } from '../../../lib/session.ts';
 
 export const runtime = 'nodejs';
@@ -26,20 +27,28 @@ export async function POST(req: Request): Promise<Response> {
 
   const bytes = new Uint8Array(await file.arrayBuffer());
   const sha256 = createHash('sha256').update(bytes).digest('hex');
-  const isOfx = /\.ofx$/i.test(file.name) || /OFXHEADER|<OFX>/i.test(new TextDecoder('latin1').decode(bytes.subarray(0, 400)));
+  // .xlsx é um zip ("PK"); .xls antigo começa com 0xD0 0xCF
+  const isXlsx = /\.xlsx$/i.test(file.name) || (bytes[0] === 0x50 && bytes[1] === 0x4b);
+  if (/\.xls$/i.test(file.name) || (bytes[0] === 0xd0 && bytes[1] === 0xcf)) {
+    return Response.json({ error: 'este é um Excel antigo (.xls): abra no Excel e use Salvar como → Pasta de Trabalho do Excel (.xlsx) ou CSV' }, { status: 422 });
+  }
+  const isOfx = !isXlsx && (/\.ofx$/i.test(file.name) || /OFXHEADER|<OFX>/i.test(new TextDecoder('latin1').decode(bytes.subarray(0, 400))));
 
   let rows: { extKey: string; date: string; amountCents: number; description: string }[];
   try {
+    const invertSign = form.get('invertSign') === 'on';
     rows = isOfx
       ? parseOfx(decodeOfx(bytes)).transactions
-      : parseStatementCsv(new TextDecoder('utf-8').decode(bytes), { invertSign: form.get('invertSign') === 'on' });
+      : isXlsx
+        ? parseStatementSheets(readXlsx(bytes), { invertSign })
+        : parseStatementCsv(new TextDecoder('utf-8').decode(bytes), { invertSign });
   } catch (err) {
     return Response.json({ error: err instanceof Error ? err.message : 'arquivo inválido' }, { status: 422 });
   }
 
   const [batch] = await db()<{ id: string }[]>`
     insert into import_batch (account_id, format, sha256, rows_total, rows_new)
-    values (${account.id}, ${isOfx ? 'ofx' : 'csv'}, ${sha256}, ${rows.length}, 0)
+    values (${account.id}, ${isOfx ? 'ofx' : 'csv'}, ${sha256}, ${rows.length}, 0)   -- Excel entra como 'csv': mesma tabela e mesmas chaves
     on conflict (account_id, sha256) do nothing returning id`;
   if (!batch) return Response.json({ error: 'este arquivo já foi importado nesta conta' }, { status: 409 });
 
