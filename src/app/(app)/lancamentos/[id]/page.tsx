@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { getCategories, getTransaction } from '../../../../db/read.ts';
 import { Amount } from '../../../../components/Amount.tsx';
 import { Icon } from '../../../../components/Icon.tsx';
-import { categorizeFromForm, deleteManual, saveNote, toggleReviewed, unpairTransfer } from '../../actions.ts';
+import { NoteForm } from '../../../../components/NoteForm.tsx';
+import { categorizeFromForm, createCategory, deleteManual, saveNote, toggleReviewed, unpairTransfer } from '../../actions.ts';
 
 const dateFmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full', timeZone: 'UTC' });
 
@@ -72,14 +73,31 @@ export default async function TransactionPage({ params }: { params: Promise<{ id
             </div>
           ))}
         </form>
+
+        <details className="inv-edit" style={{ marginTop: 8 }}>
+          <summary>Não achou? Criar uma categoria nova</summary>
+          <form action={createCategory.bind(null, tx.id)}>
+            <div className="field">
+              <label htmlFor="cat-name">Nome da categoria</label>
+              <input id="cat-name" name="name" required maxLength={40} placeholder="Ex.: Insumos" />
+            </div>
+            <div className="field">
+              <label htmlFor="cat-parent">Dentro de qual grupo?</label>
+              <select id="cat-parent" name="parent" defaultValue="">
+                <option value="">Sem grupo (categoria própria)</option>
+                {fits.filter((c) => !c.parent_name).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <label className="chip" style={{ marginBottom: 12 }}>
+              <input type="checkbox" name="learn" defaultChecked /> Classificar os parecidos assim, sempre
+            </label>
+            <button className="btn primary block">Criar e usar neste lançamento</button>
+          </form>
+        </details>
       </section>
 
       <section className="card">
-        <form action={saveNote.bind(null, tx.id)} className="field" style={{ margin: 0 }}>
-          <label htmlFor="note">Nota</label>
-          <textarea id="note" name="note" rows={2} defaultValue={tx.note ?? ''} placeholder="Ex.: dividido com a Ana" />
-          <button className="btn">Salvar nota</button>
-        </form>
+        <NoteForm note={tx.note ?? ''} saveAction={saveNote.bind(null, tx.id)} />
       </section>
 
       {tx.source === 'manual' && (

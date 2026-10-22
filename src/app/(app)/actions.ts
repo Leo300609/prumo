@@ -48,6 +48,34 @@ export async function toggleReviewed(txId: string) {
   refresh();
 }
 
+/**
+ * Cria uma categoria (opcionalmente dentro de um grupo existente) e já a aplica a este lançamento.
+ * Sem grupo, o tipo vem do sinal do valor: entrada vira receita, saída vira despesa variável.
+ * Com grupo, herda tipo, grupo do DRE e ícone dele. Repetir um nome existente reaproveita a categoria.
+ */
+export async function createCategory(txId: string, form: FormData) {
+  await requireSession();
+  const name = String(form.get('name') ?? '').trim().replace(/\s+/g, ' ').slice(0, 40);
+  if (!name) return;
+  const parentId = Number(form.get('parent')) || null;
+  const sql = db();
+  const [tx] = await sql<{ amount_cents: number }[]>`select amount_cents from transaction where id = ${txId}`;
+  if (!tx) return;
+  const [parent] = parentId
+    ? await sql<{ kind: string; dre_group: string; icon: string | null }[]>`
+        select kind, dre_group, icon from category where id = ${parentId} and parent_id is null`
+    : [];
+  if (parentId && !parent) return; // grupo inexistente ou que não é de nível raiz
+  const income = tx.amount_cents > 0;
+  const [cat] = await sql<{ id: number }[]>`
+    insert into category (parent_id, name, kind, dre_group, icon, sort)
+    values (${parentId}, ${name}, ${parent?.kind ?? (income ? 'income' : 'expense')},
+            ${parent?.dre_group ?? (income ? 'revenue' : 'variable_cost')}, ${parent?.icon ?? null}, 100)
+    on conflict (parent_id, name) do update set name = excluded.name
+    returning id`;
+  await categorize(txId, cat.id, form.get('learn') === 'on');
+}
+
 export async function saveNote(txId: string, form: FormData) {
   await requireSession();
   const note = String(form.get('note') ?? '').trim().slice(0, 500) || null;
