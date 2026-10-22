@@ -1,8 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { cookies } from 'next/headers';
+import { Bricolage_Grotesque, Figtree } from 'next/font/google';
 import { RegisterSW } from '../components/RegisterSW.tsx';
 import './globals.css';
+
+const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-display-face', display: 'swap' });
+const body = Figtree({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Prumo',
@@ -25,8 +29,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover', // conteúdo vai até as bordas; as margens seguras vêm do CSS (env(safe-area-inset-*))
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F6F3EC' },
-    { media: '(prefers-color-scheme: dark)', color: '#0C1322' },
+    { media: '(prefers-color-scheme: light)', color: '#ECEFF3' },
+    { media: '(prefers-color-scheme: dark)', color: '#090F1C' },
   ],
 };
 
@@ -36,7 +40,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const privacy = jar.get('prumo_privacy')?.value === '1';
   return (
     <html lang="pt-BR" data-theme={theme === 'light' || theme === 'dark' ? theme : undefined}
-      className={privacy ? 'privacy' : undefined}>
+      className={[display.variable, body.variable, privacy ? 'privacy' : ''].filter(Boolean).join(' ')}>
       <body>
         {children}
         <RegisterSW />

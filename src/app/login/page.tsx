@@ -7,13 +7,21 @@ export const dynamic = 'force-dynamic';
 export default async function LoginPage() {
   if (await getSession()) redirect('/');
   return (
-    <main className="shell" style={{ display: 'grid', alignContent: 'center', paddingBottom: 48 }}>
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <img src="/icons/icon-192.png" alt="" width={72} height={72} style={{ borderRadius: 18 }} />
-        <h1 style={{ margin: '12px 0 0', fontSize: 24 }}>Prumo</h1>
-        <p className="muted" style={{ margin: 0 }}>Suas finanças no prumo.</p>
-      </div>
-      <LoginForm />
+    <main className="auth">
+      <section className="auth-art">
+        <svg className="plumb" viewBox="0 0 60 420" width="60" height="420" aria-hidden="true" focusable="false">
+          <line x1="30" y1="0" x2="30" y2="340" stroke="#B8821F" strokeWidth="2" />
+          <path d="M30 336 L44 362 Q44 384 30 400 Q16 384 16 362 Z" fill="#B8821F" />
+          <path d="M30 346 L38 362 Q38 376 30 386 Z" fill="#fff" opacity=".22" />
+        </svg>
+        <div className="wordmark">Prumo</div>
+        <p>Suas finanças, alinhadas num só lugar.</p>
+      </section>
+      <section className="auth-panel">
+        <h1>Entrar</h1>
+        <p className="muted">Use sua senha e o código de 6 dígitos do autenticador.</p>
+        <LoginForm />
+      </section>
     </main>
   );
 }

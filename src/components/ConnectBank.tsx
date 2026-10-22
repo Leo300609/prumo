@@ -61,6 +61,7 @@ export function ConnectBank({ label, updateItemId, variant = 'primary' }: Props)
             router.refresh();
           }}
           onError={({ message }: { message: string }) => { setError(message); }}
+          onLoadError={(e: unknown) => { setToken(null); setError(e instanceof Error ? e.message : 'o widget da Pluggy não carregou'); }}
           onClose={() => setToken(null)}
         />
       )}
