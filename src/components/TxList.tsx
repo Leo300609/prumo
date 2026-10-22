@@ -13,7 +13,7 @@ function dayLabel(iso: string, today: string): string {
 }
 
 /** Lista agrupada por dia. Cada linha abre o detalhe, onde se classifica e confere. */
-export function TxList({ rows, today, grouped = true }: { rows: TxListRow[]; today: string; grouped?: boolean }) {
+export function TxList({ rows, today, grouped = true, from }: { rows: TxListRow[]; today: string; grouped?: boolean; from?: string }) {
   if (rows.length === 0) return <p className="empty">Nenhum lançamento por aqui.</p>;
   const groups = new Map<string, TxListRow[]>();
   for (const r of rows) {
@@ -27,8 +27,9 @@ export function TxList({ rows, today, grouped = true }: { rows: TxListRow[]; tod
           {grouped && <h3 className="day-header">{dayLabel(day, today)}</h3>}
           <ul className="tx-list">
             {items.map((t) => (
-              <li key={t.id}>
-                <Link href={`/lancamentos/${t.id}`} className="tx-row">
+              <li key={t.id} id={`tx-${t.id}`}>
+                {/* from: a página (com filtro e "carregar mais") de onde você veio, para o Voltar levar de volta a ela */}
+                <Link href={`/lancamentos/${t.id}${from ? `?from=${encodeURIComponent(from)}` : ''}`} className="tx-row">
                   <span className="tx-icon"><Icon name={t.category_icon ?? (t.is_transfer ? 'arrows' : 'question')} size={20} /></span>
                   <span className="tx-main">
                     <span className="tx-desc">{t.description}</span>

@@ -4,12 +4,16 @@ import { getCategories, getTransaction } from '../../../../db/read.ts';
 import { Amount } from '../../../../components/Amount.tsx';
 import { Icon } from '../../../../components/Icon.tsx';
 import { NoteForm } from '../../../../components/NoteForm.tsx';
+import { safeFrom } from '../../../../lib/safe-from.ts';
 import { categorizeFromForm, createCategory, deleteManual, saveNote, toggleReviewed, unpairTransfer } from '../../actions.ts';
 
 const dateFmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full', timeZone: 'UTC' });
 
-export default async function TransactionPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TransactionPage({ params, searchParams }: {
+  params: Promise<{ id: string }>; searchParams: Promise<{ from?: string }>;
+}) {
   const { id } = await params;
+  const back = safeFrom((await searchParams).from);
   const [tx, categories] = await Promise.all([getTransaction(id), getCategories()]);
   if (!tx) notFound();
 
@@ -23,7 +27,7 @@ export default async function TransactionPage({ params }: { params: Promise<{ id
   return (
     <>
       <header className="topbar">
-        <Link href="/lancamentos" className="icon-btn" aria-label="Voltar"><Icon name="back" /></Link>
+        <Link href={`${back}#tx-${id}`} className="icon-btn" aria-label="Voltar para a lista"><Icon name="back" /></Link>
         <h1 style={{ flex: 1, fontSize: 17 }}>Lançamento</h1>
       </header>
 
@@ -60,7 +64,7 @@ export default async function TransactionPage({ params }: { params: Promise<{ id
           </label>
           {[...groups.entries()].map(([parent, cats]) => (
             <div key={parent} style={{ marginBottom: 12 }}>
-              <div className="muted" style={{ fontSize: 13, margin: '4px 0 6px' }}>{parent}</div>
+              <div className="muted" style={{ fontSize: 13, margin: '4px 0 6px' }}>{parent || 'Outras categorias'}</div>
               <div className="chips">
                 {cats.map((c) => (
                   <button key={c.id} className={`chip${c.id === tx.category_id ? ' active' : ''}`}

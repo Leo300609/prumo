@@ -109,3 +109,13 @@ test('login: freio global só atrasa (nunca bloqueia) e o IP vem de fonte confi�
   assert.equal(clientIp(new Headers(), true), 'local');
   assert.equal(clientIp(new Headers(), false), 'local');
 });
+
+test('voltar do lançamento: só volta para início ou lançamentos, nunca para fora do app', async () => {
+  const { safeFrom } = await import('../src/lib/safe-from.ts');
+  const page2 = '/lancamentos?f=review&q=caf%C3%A9&cd=2026-10-01&ci=4e1de2b5-199e-467f-8ce7-cddae4e84078';
+  assert.equal(safeFrom('/inicio'), '/inicio');
+  assert.equal(safeFrom(page2), page2); // mantém filtro, busca e "carregar mais"
+  for (const bad of [undefined, '', '//evil.com', 'https://evil.com', '/login', '/lancamentos/../x', '/lancamentos?a=b c', 'javascript:alert(1)']) {
+    assert.equal(safeFrom(bad), '/lancamentos', String(bad));
+  }
+});

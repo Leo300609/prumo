@@ -23,7 +23,8 @@ export async function getCategories(): Promise<Category[]> {
     select c.id, c.name, c.kind, coalesce(c.icon, p.icon) as icon, p.name as parent_name, p.icon as parent_icon
     from category c left join category p on p.id = c.parent_id
     where c.parent_id is not null
-    order by p.sort, c.sort, c.name`;
+       or not exists (select 1 from category k where k.parent_id = c.id) -- categoria sem grupo e sem filhos (ex.: Lazer, as que você cria)
+    order by p.sort nulls last, c.sort, c.name`;
 }
 
 /** Categorias mais usadas para o sinal do valor — os atalhos da tela de revisão. */
@@ -37,7 +38,7 @@ export async function getTopCategories(sign: 1 | -1, limit = 8): Promise<Categor
       where t.category_id = c.id and t.deleted_at is null and sign(t.amount_cents) = ${sign}
         and t.date > current_date - 120
     ) u on true
-    where c.parent_id is not null
+    where (c.parent_id is not null or not exists (select 1 from category k where k.parent_id = c.id))
       and (${sign} = 1 and c.kind in ('income','transfer','investment')
            or ${sign} = -1 and c.kind in ('expense','transfer','investment'))
     order by u.n desc, p.sort, c.sort

@@ -101,7 +101,7 @@ export default async function HomePage() {
       </div>
 
       <div className="section-title"><h2>Últimos lançamentos</h2><Link href="/lancamentos">ver todos</Link></div>
-      <TxList rows={recent} today={localDate()} />
+      <TxList rows={recent} today={localDate()} from="/inicio" />
 
       <p className="muted" style={{ fontSize: 13, textAlign: 'center', marginTop: 16 }}>
         {s.last_synced_at ? `Sincronizado em ${timeFmt.format(s.last_synced_at)}` : 'Ainda não sincronizado'}

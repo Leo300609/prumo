@@ -25,6 +25,7 @@ export default async function LancamentosPage({ searchParams }: {
   const page = rows.slice(0, PAGE);
   const last = page.at(-1);
   const link = (f: string) => `/lancamentos?f=${f}${search ? `&q=${encodeURIComponent(search)}` : ''}`;
+  const here = cursorId ? `${link(filter)}&cd=${cursorDate}&ci=${cursorId}` : link(filter);
 
   return (
     <>
@@ -44,7 +45,7 @@ export default async function LancamentosPage({ searchParams }: {
         ))}
       </nav>
 
-      <TxList rows={page} today={localDate()} />
+      <TxList rows={page} today={localDate()} from={here} />
 
       {hasMore && last && (
         <p style={{ textAlign: 'center', marginTop: 16 }}>

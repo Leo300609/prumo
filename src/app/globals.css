@@ -303,3 +303,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .inv-edit { margin-top: 6px; }
 .inv-edit summary { font-size: 13px; color: var(--text-2); cursor: pointer; min-height: 32px; display: inline-flex; align-items: center; }
 .inv-edit form { margin-top: 8px; }
+
+/* voltando do detalhe, a linha do lançamento fica visível e destacada */
+.tx-list li { scroll-margin-block: 96px; }
+.tx-list li:target > .tx-row { background: color-mix(in srgb, var(--brass) 16%, transparent); }
