@@ -40,6 +40,17 @@ export async function login(_prev: LoginState, form: FormData): Promise<LoginSta
   // sempre roda o scrypt, mesmo sem usuário, para não revelar pelo tempo se o e-mail existe
   const passOk = await verifyPassword(password, user?.password_hash ?? 'scrypt$32768$8$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAA');
   const emailOk = !!user && user.email === email;
+  if (passOk && emailOk) {
+    // limite por conta, qualquer que seja o IP: só quem já sabe a senha chega aqui, então não serve para trancar o dono de fora
+    await sql`update login_attempt set pw_ok = true where id = ${attemptId}`;
+    const [{ n }] = await sql<{ n: number }[]>`
+      select count(*)::int as n from login_attempt
+      where pw_ok and not ok and at > now() - make_interval(mins => ${WINDOW_MIN})`;
+    if (n > MAX_FAILS) {
+      await sql`delete from login_attempt where id = ${attemptId}`;
+      return { error: `Muitas tentativas. Espere ${WINDOW_MIN} minutos.` };
+    }
+  }
   const counter = user?.totp_enabled && user.totp_secret_enc
     ? matchTotp(decryptField(user.totp_secret_enc, env().FIELD_ENCRYPTION_KEY), code) : null;
   let ok = passOk && emailOk && (!user?.totp_enabled || counter !== null);

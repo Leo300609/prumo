@@ -98,12 +98,14 @@ test('matchTotp devolve o passo que bateu e verifyTotp segue igual', () => {
   assert.equal(verifyTotp(secret, totpAt(secret, now / 1000), now), true);
 });
 
-test('login: freio global só atrasa (nunca bloqueia) e o IP vem do x-real-ip', () => {
+test('login: freio global só atrasa (nunca bloqueia) e o IP vem de fonte confiável', () => {
   assert.equal(softDelayMs(0), 0);
   assert.equal(softDelayMs(20), 0);
   assert.equal(softDelayMs(24), 1000);
   assert.equal(softDelayMs(10_000), 3000);
-  assert.equal(clientIp(new Headers({ 'x-real-ip': '1.2.3.4', 'x-forwarded-for': '9.9.9.9, 1.2.3.4' })), '1.2.3.4');
-  assert.equal(clientIp(new Headers({ 'x-forwarded-for': '9.9.9.9, 1.2.3.4' })), '9.9.9.9');
-  assert.equal(clientIp(new Headers()), 'local');
+  const spoofed = new Headers({ 'x-real-ip': '1.2.3.4', 'x-forwarded-for': '6.6.6.6, 9.9.9.9' });
+  assert.equal(clientIp(spoofed, true), '1.2.3.4');   // Vercel: só x-real-ip, nunca o x-forwarded-for do cliente
+  assert.equal(clientIp(spoofed, false), '9.9.9.9');  // fora dela: última entrada, a do proxy; a forjada (6.6.6.6) é ignorada
+  assert.equal(clientIp(new Headers(), true), 'local');
+  assert.equal(clientIp(new Headers(), false), 'local');
 });
