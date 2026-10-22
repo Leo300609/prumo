@@ -78,3 +78,21 @@ test('xlsx: arquivo que não é planilha e planilha sem as colunas dão erro cla
     'xl/worksheets/sheet1.xml': sheet1, 'xl/worksheets/sheet2.xml': noTable });
   assert.throws(() => parseStatementSheets(readXlsx(bad)), /colunas de data, descrição e valor/);
 });
+
+const wrap = (sheetXml: string) => zip({
+  'xl/workbook.xml': workbook, 'xl/_rels/workbook.xml.rels': rels, 'xl/sharedStrings.xml': shared,
+  'xl/worksheets/sheet1.xml': sheetXml, 'xl/worksheets/sheet2.xml': sheetXml,
+});
+
+test('xlsx de upload hostil: XML malformado em tempo linear, célula distante e zip bomba são recusados', () => {
+  const t0 = Date.now();
+  // 300 mil <c> sem fechar: uma regex preguiçosa leria o arquivo inteiro a cada abertura
+  readXlsx(wrap(`<worksheet><sheetData><row r="1">${'<c r="A1" t="s"><v>0</v>'.repeat(300_000)}</row></sheetData></worksheet>`));
+  assert.ok(Date.now() - t0 < 2_000, 'XML malformado deve ser varrido em uma passada');
+  // célula na linha 1.000.000: não pode alocar milhões de linhas vazias
+  assert.throws(() => readXlsx(wrap(`<worksheet><sheetData><row r="1000000"><c r="A1000000"><v>1</v></c></row></sheetData></worksheet>`)), /grande demais/);
+  // 60 MB de zeros que cabem em ~60 KB no zip
+  const bomb = zip({ 'xl/workbook.xml': workbook, 'xl/_rels/workbook.xml.rels': rels, 'xl/sharedStrings.xml': 'x'.repeat(10),
+    'xl/worksheets/sheet1.xml': '\0'.repeat(60 * 1024 * 1024), 'xl/worksheets/sheet2.xml': '' });
+  assert.throws(() => readXlsx(bomb), /grande demais/);
+});
