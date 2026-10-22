@@ -6,10 +6,12 @@ import { Icon } from './Icon.tsx';
 
 const TABS = [
   { href: '/', label: 'Início', icon: 'home' },
-  { href: '/lancamentos', label: 'Lançamentos', icon: 'list' },
-  { href: '/novo', label: 'Novo', icon: 'plus', fab: true },
-  { href: '/contas', label: 'Contas', icon: 'wallet' },
+  { href: '/lancamentos', label: 'Extrato', icon: 'list' },
+  { href: '/investimentos', label: 'Investir', icon: 'trending-up' },
+  { href: '/novo', label: 'Novo', icon: 'plus', fab: true },   // 4º de 7: fica no centro
   { href: '/relatorios', label: 'Relatórios', icon: 'chart' },
+  { href: '/contas', label: 'Contas', icon: 'wallet' },
+  { href: '/sair', label: 'Sair', icon: 'logout' },
 ];
 
 export function BottomNav() {

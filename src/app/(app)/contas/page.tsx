@@ -5,7 +5,7 @@ import { Amount } from '../../../components/Amount.tsx';
 import { ConnectBank } from '../../../components/ConnectBank.tsx';
 import { Icon } from '../../../components/Icon.tsx';
 import { ImportStatement } from '../../../components/ImportStatement.tsx';
-import { createManualAccount, logout, setTheme, syncNow } from '../actions.ts';
+import { createManualAccount, setTheme, syncNow } from '../actions.ts';
 
 const STATUS: Record<string, { label: string; tone: '' | 'warn' | 'error' }> = {
   active: { label: 'Em dia', tone: '' },
@@ -137,13 +137,6 @@ export default async function ContasPage() {
             </form>
           ))}
         </div>
-      </section>
-
-      <section className="card">
-        <form action={logout.bind(null, false)}><button className="btn block"><Icon name="logout" /> Sair</button></form>
-        <form action={logout.bind(null, true)} style={{ marginTop: 8 }}>
-          <button className="btn block">Sair de todos os aparelhos</button>
-        </form>
       </section>
     </>
   );
