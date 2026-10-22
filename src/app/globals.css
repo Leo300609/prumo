@@ -134,7 +134,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .account-chip .name { font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .account-chip .value { font-size: 18px; font-weight: 650; letter-spacing: -0.01em; }
 
-.day-header { font-size: 13px; font-weight: 600; color: var(--text-2); margin: 16px 4px 6px; text-transform: capitalize; }
+.day-header { font-size: 13px; font-weight: 600; color: var(--text-2); margin: 16px 4px 6px; }
+.day-header::first-letter { text-transform: uppercase; }
 .tx-list { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .tx-row { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border-top: 1px solid var(--border); }
 .tx-row:first-child { border-top: 0; }
@@ -142,10 +143,22 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .tx-icon { flex: 0 0 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--ink); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tx-icon { color: var(--brass); } }
 :root[data-theme="dark"] .tx-icon { color: var(--brass); }
-.tx-main { flex: 1; min-width: 0; }
-.tx-desc { font-weight: 550; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tx-meta { font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tx-amount { font-weight: 650; white-space: nowrap; }
+/* .tx-desc/.tx-meta são <span>: sem display:block o overflow/ellipsis não vale e o texto vaza por cima do valor */
+.tx-main { flex: 1 1 0; min-width: 0; }
+.tx-desc {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+  overflow: hidden; overflow-wrap: anywhere; font-weight: 550; line-height: 1.25;
+}
+.tx-meta {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+  overflow: hidden; overflow-wrap: anywhere; font-size: 13px; line-height: 1.35; color: var(--text-2); margin-top: 2px;
+}
+@media (max-width: 380px) {
+  .tx-row { gap: 10px; padding: 10px 12px; }
+  .tx-icon { flex-basis: 34px; height: 34px; }
+  .tx-amount { font-size: 15px; }
+}
+.tx-amount { flex: none; margin-left: auto; padding-left: 4px; font-weight: 650; white-space: nowrap; }
 .amount.in { color: var(--pos); }
 .amount.negative-balance { color: var(--neg); }
 .badge { display: inline-block; font-size: 11px; font-weight: 650; padding: 2px 6px; border-radius: 6px; background: var(--surface-2); color: var(--text-2); vertical-align: 1px; }
