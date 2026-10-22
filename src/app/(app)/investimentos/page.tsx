@@ -1,12 +1,15 @@
 import { db, q } from '../../../db/index.ts';
 import { Amount } from '../../../components/Amount.tsx';
 import { EvolutionChart } from '../../../components/EvolutionChart.tsx';
+import { groupName, invTitle, rateLabel } from '../../../domain/investments.ts';
 import { addDays, localDate } from '../../../lib/time.ts';
+import { updateInvestment } from '../actions.ts';
 
 type Inv = {
   id: string; name: string; type: string; subtype: string | null; code: string | null;
   balance_cents: number; amount_original_cents: number | null; status: string | null; updated_at: Date;
-  institution: string | null;
+  institution: string | null; nickname: string | null; group_label: string | null; connector: string | null;
+  rate_type: string | null; rate: number | null; fixed_rate: number | null; issue_date: Date | null; due_date: Date | null;
 };
 type Returns = { twr: number | null; twr_aa: number | null; days: number | null; cdi: number | null; pct_cdi: number | null };
 type Flow = { date: Date; type: string; amount_cents: number; name: string };
@@ -15,7 +18,6 @@ const TYPE_LABEL: Record<string, string> = {
   FIXED_INCOME: 'Renda fixa', EQUITY: 'Ações', ETF: 'ETFs', MUTUAL_FUND: 'Fundos',
   SECURITY: 'Títulos', COE: 'COE', MANUAL: 'Manual',
 };
-const TYPE_ORDER = ['FIXED_INCOME', 'MUTUAL_FUND', 'SECURITY', 'EQUITY', 'ETF', 'COE', 'MANUAL'];
 const SUBTYPE_LABEL: Record<string, string> = {
   CDB: 'CDB', LCI: 'LCI', LCA: 'LCA', LC: 'LC', LF: 'LF', CRI: 'CRI', CRA: 'CRA', DEBENTURE: 'Debênture',
   TREASURY: 'Tesouro Direto', RETIREMENT: 'Previdência', STOCK: 'Ação', REAL_ESTATE_FUND: 'FII',
@@ -32,7 +34,8 @@ export default async function InvestimentosPage() {
   const [investments, snapshots, [r30], [r365], flows] = await Promise.all([
     db()<Inv[]>`
       select i.id, i.name, i.type, i.subtype, i.code, i.balance_cents, i.amount_original_cents, i.status, i.updated_at,
-             c.connector_name as institution
+             i.institution, i.nickname, i.group_label, c.connector_name as connector,
+             i.rate_type, i.rate, i.fixed_rate, i.issue_date, i.due_date
       from investment i left join connection c on c.id = i.connection_id
       where i.balance_cents <> 0
       order by i.balance_cents desc`,
@@ -54,12 +57,14 @@ export default async function InvestimentosPage() {
   const cost = withCost.reduce((s, i) => s + (i.amount_original_cents ?? 0), 0);
   const gain = costBalance - cost;
 
+  // por onde o dinheiro está (Inter, Nubank…), do maior para o menor; dentro de cada um, o maior primeiro
   const groups = new Map<string, Inv[]>();
-  for (const i of investments) groups.set(i.type, [...(groups.get(i.type) ?? []), i]);
-  const orderedTypes = [...groups.keys()].sort((a, b) => {
-    const ia = TYPE_ORDER.indexOf(a), ib = TYPE_ORDER.indexOf(b);
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-  });
+  for (const i of investments) {
+    const g = groupName(i);
+    groups.set(g, [...(groups.get(g) ?? []), i]);
+  }
+  const sumOf = (list: Inv[]) => list.reduce((t, i) => t + i.balance_cents, 0);
+  const orderedGroups = [...groups.keys()].sort((x, y) => sumOf(groups.get(y)!) - sumOf(groups.get(x)!));
 
   const points = snapshots.map((s) => ({ date: s.date.toISOString().slice(0, 10), cents: s.market_value_cents }));
   const lastUpdate = investments.reduce<Date | null>((m, i) => (!m || i.updated_at > m ? i.updated_at : m), null);
@@ -92,15 +97,15 @@ export default async function InvestimentosPage() {
           </section>
 
           <section className="card">
-            <h2>Distribuição</h2>
+            <h2>Onde está o dinheiro</h2>
             <div className="kv">
-              {orderedTypes.map((t) => {
-                const sum = groups.get(t)!.reduce((s, i) => s + i.balance_cents, 0);
+              {orderedGroups.map((g) => {
+                const sum = sumOf(groups.get(g)!);
                 const share = total > 0 ? sum / total : 0;
                 return (
-                  <div key={t} style={{ display: 'contents' }}>
+                  <div key={g} style={{ display: 'contents' }}>
                     <span>
-                      {typeName(t)}
+                      {g}
                       <span style={{ display: 'block', height: 6, borderRadius: 3, background: 'var(--surface-2)', marginTop: 4 }}>
                         <span style={{ display: 'block', height: 6, borderRadius: 3, background: 'var(--brass)', width: `${Math.max(2, share * 100)}%` }} />
                       </span>
@@ -112,35 +117,57 @@ export default async function InvestimentosPage() {
             </div>
           </section>
 
-          {orderedTypes.map((t) => (
-            <section key={t} className="card">
-              <h2>{typeName(t)}</h2>
-              <div className="kv">
-                {groups.get(t)!.map((i) => {
-                  const g = i.amount_original_cents && i.amount_original_cents > 0 ? i.balance_cents - i.amount_original_cents : null;
+          {orderedGroups.map((g) => (
+            <section key={g} className="card">
+              <div className="inv-head">
+                <h2>{g}</h2>
+                <span><Amount cents={sumOf(groups.get(g)!)} balance /></span>
+              </div>
+              <ul className="inv-list">
+                {groups.get(g)!.map((i) => {
+                  const gain = i.amount_original_cents && i.amount_original_cents > 0 ? i.balance_cents - i.amount_original_cents : null;
+                  const title = invTitle(i);
+                  const rate = rateLabel(i.rate_type, i.rate, i.fixed_rate);
+                  const kind = rate && i.subtype ? `${i.subtype} ${rate}` : subName(i.subtype) ?? typeName(i.type);
+                  // o título já traz tipo e taxa quando não há apelido; com apelido, eles passam para a linha de baixo
+                  const sub = [
+                    i.nickname?.trim() || !rate ? kind : null,
+                    i.issue_date ? `aplicado em ${dt.format(i.issue_date)}` : null,
+                    i.due_date ? `vence em ${dt.format(i.due_date)}` : null,
+                    i.code,
+                  ].filter((part) => part && part !== title).join(' · ');
                   return (
-                    <div key={i.id} style={{ display: 'contents' }}>
-                      <span>
-                        {i.name}
-                        <span className="muted" style={{ display: 'block', fontSize: 13 }}>
-                          {[subName(i.subtype), i.code, i.institution && i.institution.toLowerCase().replace(/\s/g, '') !== 'meupluggy' ? i.institution : null]
-                            .filter(Boolean).join(' · ') || typeName(i.type)}
+                    <li key={i.id} className="inv-row">
+                      <div className="inv-line">
+                        <span className="inv-title">{title}<span className="inv-sub">{sub}</span></span>
+                        <span className="inv-val">
+                          <Amount cents={i.balance_cents} balance />
+                          {gain != null && (
+                            <span className="inv-sub"><Amount cents={gain} signed balance /> ({pct(gain / i.amount_original_cents!)})</span>
+                          )}
                         </span>
-                      </span>
-                      <span style={{ textAlign: 'right' }}>
-                        <Amount cents={i.balance_cents} balance />
-                        {g != null && (
-                          <span className="muted" style={{ display: 'block', fontSize: 13 }}>
-                            <Amount cents={g} signed balance /> ({pct(g / i.amount_original_cents!)})
-                          </span>
-                        )}
-                      </span>
-                    </div>
+                      </div>
+                      <details className="inv-edit">
+                        <summary>Renomear ou mudar de grupo</summary>
+                        <form action={updateInvestment.bind(null, i.id)}>
+                          <div className="field">
+                            <label htmlFor={`n-${i.id}`}>Nome na lista</label>
+                            <input id={`n-${i.id}`} name="nickname" defaultValue={i.nickname ?? ''} placeholder={i.name} maxLength={60} />
+                          </div>
+                          <div className="field">
+                            <label htmlFor={`g-${i.id}`}>Grupo</label>
+                            <input id={`g-${i.id}`} name="group" list="inv-groups" defaultValue={i.group_label ?? ''} placeholder={g} maxLength={40} />
+                          </div>
+                          <button className="btn primary block">Salvar</button>
+                        </form>
+                      </details>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </section>
           ))}
+          <datalist id="inv-groups">{orderedGroups.map((g) => <option key={g} value={g} />)}</datalist>
 
           {points.length >= 2 && (
             <section className="card">

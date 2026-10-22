@@ -104,7 +104,8 @@ export function mapTransaction(t: PluggyTransaction, localAccountId: string, kin
 
 export type InvestmentRow = {
   provider_investment_id: string; name: string; type: string; subtype: string | null; code: string | null;
-  balance_cents: number; amount_original_cents: number | null; status: string | null;
+  balance_cents: number; amount_original_cents: number | null; status: string | null; institution: string | null;
+  rate_type: string | null; rate: number | null; fixed_rate: number | null; issue_date: string | null; due_date: string | null;
 };
 
 export type InvestmentFlowRow = {
@@ -121,6 +122,12 @@ export function mapInvestment(i: PluggyInvestment): InvestmentRow {
     balance_cents: toCents(i.balance ?? 0),
     amount_original_cents: i.amountOriginal != null ? toCents(i.amountOriginal) : null,
     status: i.status ?? null,
+    institution: i.institution?.name?.trim() || i.issuer?.trim() || null,
+    rate_type: i.rateType ?? null,
+    rate: i.rate ?? null,
+    fixed_rate: i.fixedAnnualRate ?? null,
+    issue_date: i.issueDate ? transactionDate(i.issueDate) : null,
+    due_date: i.dueDate ? transactionDate(i.dueDate) : null,
   };
 }
 

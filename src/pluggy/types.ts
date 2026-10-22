@@ -60,6 +60,13 @@ export type PluggyInvestment = {
   amountOriginal?: number | null;
   status?: string | null;
   currencyCode?: string;
+  issuer?: string | null;                       // emissor (ex.: Banco Inter)
+  rateType?: string | null;                     // CDI, PRE…
+  rate?: number | null;                         // 103 = 103% do CDI
+  fixedAnnualRate?: number | null;
+  issueDate?: string | null;
+  dueDate?: string | null;
+  institution?: { name?: string | null } | null; // instituição que custodia
 };
 
 export type PluggyInvestmentTransaction = {

@@ -288,3 +288,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .auth-art p { font-size: 32px; }
   .plumb { right: 18%; height: 78%; }
 }
+
+/* ── investimentos: grupos por instituição, com nome e valor sempre legíveis ── */
+.inv-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+.inv-head h2 { margin: 0; }
+.inv-head .amount { font-weight: 700; }
+.inv-list { list-style: none; margin: 0; padding: 0; }
+.inv-row { padding: 12px 0; border-top: 1px solid var(--border); }
+.inv-row:first-child { border-top: 0; }
+.inv-line { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.inv-title { min-width: 0; flex: 1; font-weight: 600; overflow-wrap: anywhere; line-height: 1.25; }
+.inv-sub { display: block; font-size: 13px; font-weight: 400; color: var(--text-2); margin-top: 2px; }
+.inv-val { flex: none; text-align: right; font-weight: 650; }
+.inv-edit { margin-top: 6px; }
+.inv-edit summary { font-size: 13px; color: var(--text-2); cursor: pointer; min-height: 32px; display: inline-flex; align-items: center; }
+.inv-edit form { margin-top: 8px; }

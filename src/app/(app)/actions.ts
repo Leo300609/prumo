@@ -110,6 +110,15 @@ export async function addTransaction(_prev: AddState, form: FormData): Promise<A
   redirect('/');
 }
 
+/** Apelido e grupo de um investimento (ex.: "Reserva de emergência" no grupo "Nubank"). Vazio limpa. */
+export async function updateInvestment(id: string, form: FormData) {
+  await requireSession();
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return;
+  const clean = (k: string, max: number) => String(form.get(k) ?? '').trim().slice(0, max) || null;
+  await db()`update investment set nickname = ${clean('nickname', 60)}, group_label = ${clean('group', 40)} where id = ${id}`;
+  revalidatePath('/investimentos');
+}
+
 export async function createManualAccount(form: FormData) {
   await requireSession();
   const name = String(form.get('name') ?? '').trim().slice(0, 60);
