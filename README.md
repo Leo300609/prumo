@@ -92,6 +92,8 @@ a ferramenta que mostra o que está alinhado. É essa a ideia: suas contas, no p
   A planilha só precisa de colunas de data, descrição e valor: o cabeçalho pode estar abaixo de um título, e
   linhas de total são ignoradas
 - **Auto-categorização**: regras, dicionário e histórico por similaridade
+- O **Voltar** do lançamento leva de volta à mesma página da lista (filtro, busca e "Carregar mais") e à linha que você estava editando
+- Qualquer categoria sem subcategorias pode ser escolhida, inclusive as que você cria
 - **Categorias novas na hora**: na tela do lançamento, "Criar uma categoria nova" (nome e grupo opcional) já a aplica ao lançamento e aos parecidos
 - **Conciliação simples**: fila "A classificar" de um toque e junção do lançamento manual com o do banco
 - Pareamento automático de transferências entre contas suas
