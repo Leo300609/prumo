@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { q } from '../../db/index.ts';
-import { getAccounts, getConnections, type TxListRow } from '../../db/read.ts';
-import { Amount } from '../../components/Amount.tsx';
-import { Icon } from '../../components/Icon.tsx';
-import { TxList } from '../../components/TxList.tsx';
-import { localDate, monthStart } from '../../lib/time.ts';
-import { syncNow, togglePrivacy } from './actions.ts';
+import { q } from '../../../db/index.ts';
+import { getAccounts, getConnections, type TxListRow } from '../../../db/read.ts';
+import { Amount } from '../../../components/Amount.tsx';
+import { Icon } from '../../../components/Icon.tsx';
+import { TxList } from '../../../components/TxList.tsx';
+import { localDate, monthStart } from '../../../lib/time.ts';
+import { syncNow, togglePrivacy } from '../actions.ts';
 import { cookies } from 'next/headers';
 
 type Summary = {

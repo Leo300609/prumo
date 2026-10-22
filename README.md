@@ -38,7 +38,14 @@ a ferramenta que mostra o que está alinhado. É essa a ideia: suas contas, no p
 
 ## 📸 Telas
 
-> Todas as telas abaixo usam **dados fictícios**.
+> As telas do app usam **dados fictícios**.
+
+**Página inicial** (pública, em `/`): apresenta o app e leva ao login pelo botão "Entrar". Quem já está logado vai direto para o app.
+
+<p align="center">
+  <img src="docs/screenshots/landing-desktop.png" alt="Página inicial do Prumo no desktop: título, texto e duas telas do app" width="72%">
+  <img src="docs/screenshots/landing-mobile.png" alt="Página inicial do Prumo no celular" width="24%">
+</p>
 
 **Entrada**, no desktop e no celular, nos temas claro e escuro:
 
@@ -106,6 +113,10 @@ a ferramenta que mostra o que está alinhado. É essa a ideia: suas contas, no p
 - Rotina diária de segurança, para o caso de algum webhook se perder
 - Alerta quando uma conexão precisa de atenção e antes de a autorização do Meu Pluggy vencer
 
+**Página inicial**
+- Landing pública em `/`, com o botão **Entrar** que leva ao `/login`. Logado, `/` redireciona para `/inicio`
+- Imagem de compartilhamento (Open Graph) para quando o link for colado em mensagens
+
 **App**
 - **PWA** instalável no Android e no iOS: ícone, tela cheia e tela offline
 - Layout pensado para o polegar: navegação inferior com sete abas (Início, Extrato, Investir, Novo, Relatórios,
@@ -113,6 +124,8 @@ a ferramenta que mostra o que está alinhado. É essa a ideia: suas contas, no p
 - Página **Sair** com "sair deste aparelho" e "sair de todos os aparelhos"
 
 ## 🧭 Como funciona
+
+> **Rotas:** `/` é a página inicial pública; `/login` pede senha e código do autenticador; o app vive em `/inicio` e nas telas seguintes. Quem tenta abrir uma tela do app sem estar logado cai no `/login`.
 
 ```mermaid
 flowchart LR
@@ -296,9 +309,9 @@ pnpm test:db         # SQL: cenário de ponta a ponta do banco (seed idempotente
 │   ├── seed.sql         # 38 categorias e as regras de sistema
 │   └── test/            # cenários SQL
 ├── scripts/             # migrate, create-user, register-webhook, make-icons
-├── public/              # ícones, service worker, tela offline
+├── public/              # ícones, imagens da landing, service worker, tela offline
 ├── src/
-│   ├── app/             # telas (início, lançamentos, investimentos, contas, sair…), rotas de API e login
+│   ├── app/             # landing (/), telas do app (/inicio, lançamentos, investimentos…), rotas de API e login
 │   ├── components/      # Amount, TxList, BottomNav, ConnectBank, ForecastChart…
 │   ├── db/              # conexão e portas do banco (sync, webhook, fila)
 │   ├── domain/          # regras puras: OFX, CSV, XLSX, agrupamento de investimentos, XIRR, projeção
@@ -314,6 +327,7 @@ pnpm test:db         # SQL: cenário de ponta a ponta do banco (seed idempotente
 
 - [x] Acesso a dados reais na Pluggy (os investimentos já sincronizam com bancos de verdade)
 - [x] Investimentos agrupados por instituição e importação de planilhas do Excel
+- [x] Landing page pública como porta de entrada
 
 Ideias para depois: metas e orçamento por categoria, alertas de vencimento de fatura e exportação dos dados.
 

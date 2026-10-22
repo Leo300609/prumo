@@ -52,7 +52,7 @@ export default async function RevisarPage() {
         <div className="empty">
           <Icon name="check" size={40} />
           <p>Tudo classificado. Seu mês está no prumo.</p>
-          <Link className="btn" href="/">Voltar ao início</Link>
+          <Link className="btn" href="/inicio">Voltar ao início</Link>
         </div>
       ) : (
         <section className="card" aria-live="polite">

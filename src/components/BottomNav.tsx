@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Icon } from './Icon.tsx';
 
 const TABS = [
-  { href: '/', label: 'Início', icon: 'home' },
+  { href: '/inicio', label: 'Início', icon: 'home' },
   { href: '/lancamentos', label: 'Extrato', icon: 'list' },
   { href: '/investimentos', label: 'Investir', icon: 'trending-up' },
   { href: '/novo', label: 'Novo', icon: 'plus', fab: true },   // 4º de 7: fica no centro
@@ -20,7 +20,7 @@ export function BottomNav() {
     <nav className="bottom-nav" aria-label="Navegação principal">
       <ul>
         {TABS.map((t) => {
-          const active = t.href === '/' ? path === '/' : path.startsWith(t.href);
+          const active = path.startsWith(t.href);
           return (
             <li key={t.href}>
               <Link href={t.href} aria-current={active ? 'page' : undefined} prefetch>

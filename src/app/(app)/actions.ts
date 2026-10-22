@@ -107,7 +107,7 @@ export async function addTransaction(_prev: AddState, form: FormData): Promise<A
   await db()`update account set balance_cents = balance_cents + ${direction * cents}
              where id = ${accountId} and connection_id is null`;
   refresh();
-  redirect('/');
+  redirect('/inicio');
 }
 
 /** Apelido e grupo de um investimento (ex.: "Reserva de emergência" no grupo "Nubank"). Vazio limpa. */

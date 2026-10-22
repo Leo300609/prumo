@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'Prumo',
     description: 'Saldos, lançamentos e conciliação das suas contas, num só lugar.',
     id: '/',
-    start_url: '/',
+    start_url: '/inicio',
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',

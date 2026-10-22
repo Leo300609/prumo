@@ -67,5 +67,5 @@ export async function login(_prev: LoginState, form: FormData): Promise<LoginSta
   await sql`update login_attempt set ok = true where id = ${attemptId}`;
 
   await createSession(h.get('user-agent'));
-  redirect('/');
+  redirect('/inicio');
 }
