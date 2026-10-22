@@ -34,7 +34,7 @@ await sql`
   insert into app_user (id, email, password_hash, totp_secret_enc, totp_enabled)
   values (1, ${email}, ${hash}, ${encryptField(secret, FIELD_ENCRYPTION_KEY)}, true)
   on conflict (id) do update set email = excluded.email, password_hash = excluded.password_hash,
-    totp_secret_enc = excluded.totp_secret_enc, totp_enabled = true`;
+    totp_secret_enc = excluded.totp_secret_enc, totp_enabled = true, totp_last_counter = null`;
 await sql`delete from session`; // redefinir credenciais derruba sessões antigas
 await sql.end();
 console.log(`✔ usuário ${email} pronto, com 2FA ativo.`);

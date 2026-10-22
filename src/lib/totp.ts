@@ -50,18 +50,25 @@ export function totpAt(secret: string, unixSeconds: number, step = 30, digits = 
   return code.toString().padStart(digits, '0');
 }
 
-/** Aceita o código atual e um passo antes/depois (relógio do celular adiantado/atrasado até 30 s). */
-export function verifyTotp(secret: string, token: string, now = Date.now(), window = 1): boolean {
+/**
+ * Aceita o código atual e um passo antes/depois (relógio do celular adiantado/atrasado até 30 s).
+ * Devolve o número do passo que bateu (para recusar reuso) ou null.
+ */
+export function matchTotp(secret: string, token: string, now = Date.now(), window = 1): number | null {
   const clean = token.replace(/\s/g, '');
-  if (!/^\d{6}$/.test(clean)) return false;
+  if (!/^\d{6}$/.test(clean)) return null;
   const t = Math.floor(now / 1000);
-  let ok = false;
+  let hit: number | null = null;
   for (let w = -window; w <= window; w++) {
     const expected = Buffer.from(totpAt(secret, t + w * 30));
     // compara todos os passos, sem sair cedo, para não vazar tempo
-    if (timingSafeEqual(expected, Buffer.from(clean))) ok = true;
+    if (timingSafeEqual(expected, Buffer.from(clean))) hit = Math.floor(t / 30) + w;
   }
-  return ok;
+  return hit;
+}
+
+export function verifyTotp(secret: string, token: string, now = Date.now(), window = 1): boolean {
+  return matchTotp(secret, token, now, window) !== null;
 }
 
 export function otpauthUrl(secret: string, account: string, issuer = 'Prumo'): string {

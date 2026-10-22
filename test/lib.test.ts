@@ -2,7 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { formatBRL, parseBRL, toCents } from '../src/lib/money.ts';
 import { addDays, lastScheduledInstant, localDate, monthStart, tzOffsetMinutes } from '../src/lib/time.ts';
-import { base32Decode, base32Encode, generateTotpSecret, totpAt, verifyTotp } from '../src/lib/totp.ts';
+import { base32Decode, base32Encode, generateTotpSecret, matchTotp, totpAt, verifyTotp } from '../src/lib/totp.ts';
+import { clientIp, softDelayMs } from '../src/lib/login-guard.ts';
 import { hashPassword, verifyPassword } from '../src/lib/password.ts';
 import { decryptField, encryptField } from '../src/lib/crypto-field.ts';
 
@@ -84,4 +85,25 @@ test('cifra de campo: ida e volta, e detecção de adulteração', () => {
   tampered[tampered.length - 1] ^= 1;
   assert.throws(() => decryptField(tampered, key));
   assert.throws(() => encryptField('x', 'curta'));
+});
+
+test('matchTotp devolve o passo que bateu e verifyTotp segue igual', () => {
+  const secret = 'JBSWY3DPEHPK3PXP';
+  const now = Date.UTC(2026, 9, 21, 12, 0, 10);
+  const step = Math.floor(now / 1000 / 30);
+  assert.equal(matchTotp(secret, totpAt(secret, now / 1000), now), step);
+  assert.equal(matchTotp(secret, totpAt(secret, now / 1000 - 30), now), step - 1);
+  assert.equal(matchTotp(secret, totpAt(secret, now / 1000 + 60), now), null);
+  assert.equal(matchTotp(secret, 'abc123', now), null);
+  assert.equal(verifyTotp(secret, totpAt(secret, now / 1000), now), true);
+});
+
+test('login: freio global só atrasa (nunca bloqueia) e o IP vem do x-real-ip', () => {
+  assert.equal(softDelayMs(0), 0);
+  assert.equal(softDelayMs(20), 0);
+  assert.equal(softDelayMs(24), 1000);
+  assert.equal(softDelayMs(10_000), 3000);
+  assert.equal(clientIp(new Headers({ 'x-real-ip': '1.2.3.4', 'x-forwarded-for': '9.9.9.9, 1.2.3.4' })), '1.2.3.4');
+  assert.equal(clientIp(new Headers({ 'x-forwarded-for': '9.9.9.9, 1.2.3.4' })), '9.9.9.9');
+  assert.equal(clientIp(new Headers()), 'local');
 });
