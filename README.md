@@ -38,12 +38,21 @@ a ferramenta que mostra o que está alinhado. É essa a ideia: suas contas, no p
 
 ## 📸 Telas
 
-> As telas do app abaixo usam **dados fictícios**.
+> Todas as telas abaixo usam **dados fictícios**.
+
+**Entrada**, no desktop e no celular, nos temas claro e escuro:
 
 <p align="center">
   <img src="docs/screenshots/login-desktop-claro.png" alt="Tela de entrada, tema claro, no desktop" width="49%">
   <img src="docs/screenshots/login-desktop-escuro.png" alt="Tela de entrada, tema escuro, no desktop" width="49%">
 </p>
+
+<p align="center">
+  <img src="docs/screenshots/login-mobile-claro.jpg" alt="Entrada no celular, tema claro" width="24%">
+  <img src="docs/screenshots/login-mobile-escuro.jpg" alt="Entrada no celular, tema escuro" width="24%">
+</p>
+
+**Início e lançamentos**: saldo, resultado do mês, contas e o extrato agrupado por dia.
 
 <p align="center">
   <img src="docs/screenshots/app-inicio-claro.png" alt="Início, tema claro" width="24%">
@@ -52,9 +61,13 @@ a ferramenta que mostra o que está alinhado. É essa a ideia: suas contas, no p
   <img src="docs/screenshots/app-lancamentos-escuro.png" alt="Lançamentos, tema escuro" width="24%">
 </p>
 
+**Investir**: os investimentos agrupados por instituição, com taxa, aplicação e vencimento, e nomes que você escolhe. **Importar**: extrato OFX, CSV ou planilha do Excel.
+
 <p align="center">
-  <img src="docs/screenshots/login-mobile-claro.jpg" alt="Entrada no celular, tema claro" width="24%">
-  <img src="docs/screenshots/login-mobile-escuro.jpg" alt="Entrada no celular, tema escuro" width="24%">
+  <img src="docs/screenshots/app-investir-claro.png" alt="Investimentos agrupados por instituição, tema claro" width="24%">
+  <img src="docs/screenshots/app-investir-escuro.png" alt="Investimentos agrupados por instituição, tema escuro" width="24%">
+  <img src="docs/screenshots/app-importar-claro.png" alt="Importação de extrato e planilha, tema claro" width="24%">
+  <img src="docs/screenshots/app-importar-escuro.png" alt="Importação de extrato e planilha, tema escuro" width="24%">
 </p>
 
 ## ✨ Recursos
@@ -68,10 +81,20 @@ a ferramenta que mostra o que está alinhado. É essa a ideia: suas contas, no p
 **Lançamentos**
 - Busca e filtros, agrupados por dia
 - Lançamento manual rápido, para dinheiro em espécie e bancos fora do Open Finance
-- Importação de extratos **OFX e CSV** (inclui o formato de conta e de cartão do Nubank)
+- Importação de extratos **OFX, CSV e planilhas do Excel (.xlsx)**, inclusive o formato de conta e de cartão do Nubank.
+  A planilha só precisa de colunas de data, descrição e valor: o cabeçalho pode estar abaixo de um título, e
+  linhas de total são ignoradas
 - **Auto-categorização**: regras, dicionário e histórico por similaridade
 - **Conciliação simples**: fila "A classificar" de um toque e junção do lançamento manual com o do banco
 - Pareamento automático de transferências entre contas suas
+
+**Investimentos**
+- Agrupados por **instituição** (Nubank, Inter…), com o total e a participação de cada uma
+- Cada CDB mostra **taxa, data de aplicação e vencimento** (ex.: "CDB 103% do CDI"), o que distingue títulos que a
+  Pluggy devolve com o mesmo nome
+- **Renomear e reagrupar** direto na lista ("Reserva de emergência", "Sonho de consumo"). A sincronização nunca
+  sobrescreve o que você escreveu
+- Evolução da carteira, rendimento sobre o valor aplicado e últimos aportes e resgates
 
 **Análises**
 - DRE do mês e patrimônio líquido
@@ -85,7 +108,9 @@ a ferramenta que mostra o que está alinhado. É essa a ideia: suas contas, no p
 
 **App**
 - **PWA** instalável no Android e no iOS: ícone, tela cheia e tela offline
-- Layout pensado para o polegar: navegação inferior no celular e trilho lateral no desktop
+- Layout pensado para o polegar: navegação inferior com sete abas (Início, Extrato, Investir, Novo, Relatórios,
+  Contas e Sair) no celular e trilho lateral no desktop
+- Página **Sair** com "sair deste aparelho" e "sair de todos os aparelhos"
 
 ## 🧭 Como funciona
 
@@ -245,6 +270,8 @@ Os dados são financeiros, então o básico foi levado a sério:
 - **Campos sensíveis:** o segredo do 2FA é cifrado com **AES-256-GCM** antes de ir ao banco.
 - **Webhook:** não há assinatura HMAC na Pluggy, então a autenticação é um cabeçalho secreto, comparado em tempo
   constante. Eventos repetidos são ignorados pelo `eventId`.
+- **Uploads:** só com sessão, até 5 MB. O leitor de `.xlsx` é próprio e tem tetos de descompactação, linhas, colunas
+  e células, além de varrer o XML em tempo linear. Importar o mesmo arquivo duas vezes não duplica lançamentos.
 - **Cabeçalhos HTTP:** CSP restrita (só `*.pluggy.ai` para o widget), HSTS, `X-Frame-Options: DENY` e
   `Permissions-Policy` fechada.
 - **Segredos:** nada de credenciais no repositório. O `.env.local` está no `.gitignore`.
@@ -255,7 +282,7 @@ Achou algo? Abra uma *issue* sem colar dados reais.
 
 ```bash
 pnpm typecheck
-pnpm test            # unidade: TOTP, senha, criptografia, dinheiro, datas, OFX/CSV, XIRR, projeção, cliente e webhook da Pluggy
+pnpm test            # unidade: TOTP, senha, criptografia, dinheiro, datas, OFX/CSV/XLSX, investimentos, XIRR, projeção, cliente e webhook da Pluggy
 pnpm test:db         # SQL: cenário de ponta a ponta do banco (seed idempotente, normalização, contas…), num Postgres descartável
 ```
 
@@ -264,17 +291,17 @@ pnpm test:db         # SQL: cenário de ponta a ponta do banco (seed idempotente
 ```
 .
 ├── db/
-│   ├── migrations/      # esquema do banco, em ordem (001, 002, 003…)
+│   ├── migrations/      # esquema do banco, em ordem (001 a 005 até aqui)
 │   ├── queries/         # SQL de negócio, um arquivo por consulta
 │   ├── seed.sql         # 38 categorias e as regras de sistema
 │   └── test/            # cenários SQL
 ├── scripts/             # migrate, create-user, register-webhook, make-icons
 ├── public/              # ícones, service worker, tela offline
 ├── src/
-│   ├── app/             # telas, rotas de API (webhook, cron, health…) e login
+│   ├── app/             # telas (início, lançamentos, investimentos, contas, sair…), rotas de API e login
 │   ├── components/      # Amount, TxList, BottomNav, ConnectBank, ForecastChart…
 │   ├── db/              # conexão e portas do banco (sync, webhook, fila)
-│   ├── domain/          # regras puras: OFX, CSV, XIRR, projeção
+│   ├── domain/          # regras puras: OFX, CSV, XLSX, agrupamento de investimentos, XIRR, projeção
 │   ├── jobs/            # worker, handlers e agendamentos
 │   ├── lib/             # sessão, TOTP, senha, criptografia, dinheiro, datas
 │   └── pluggy/          # cliente, tipos, mapeamento e sincronização
@@ -285,7 +312,8 @@ pnpm test:db         # SQL: cenário de ponta a ponta do banco (seed idempotente
 
 ## 🗺️ Próximos passos
 
-- [ ] Acesso a dados reais na Pluggy e a primeira sincronização com bancos de verdade
+- [x] Acesso a dados reais na Pluggy (os investimentos já sincronizam com bancos de verdade)
+- [x] Investimentos agrupados por instituição e importação de planilhas do Excel
 
 Ideias para depois: metas e orçamento por categoria, alertas de vencimento de fatura e exportação dos dados.
 
