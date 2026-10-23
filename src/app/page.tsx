@@ -43,7 +43,7 @@ const SAFE = [
   ['Senha e código do autenticador', 'O login exige os dois, e cada código só vale uma vez.'],
   ['Limite de tentativas', 'Por IP e por conta, sem deixar ninguém trancar o dono do lado de fora.'],
   ['Sessões que você controla', 'Saia deste aparelho ou de todos de uma vez.'],
-  ['Dados no seu banco', 'O Prumo roda na sua infraestrutura, com o seu Postgres. Não há terceiros guardando seus saldos.'],
+  ['Dados no seu banco', 'Os saldos ficam no seu próprio Postgres, na sua conta de hospedagem, e não num app de terceiros.'],
 ] as const;
 
 function Phone({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
